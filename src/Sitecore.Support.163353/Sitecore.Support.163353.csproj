@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExperienceEditor\Speak\Ribbon\Requests\LockItem\ToggleLockRequest.cs" />
+    <Compile Include="Helpers\RelatedItemHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

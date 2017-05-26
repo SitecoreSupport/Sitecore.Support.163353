@@ -6,6 +6,10 @@ using Sitecore.Data.Items;
 using System.Collections.Generic;
 using System.Xml;
 using Sitecore.Xml;
+using System.Linq.Expressions;
+using System.Linq;
+using Sitecore.Support.ExperienceEditor.Speak.Ribbon.Requests.LockItem;
+using Sitecore.Support.Helpers;
 
 namespace Sitecore.Support.ExperienceEditor.Speak.Ribbon.Requests.LockItem
 {
@@ -35,7 +39,7 @@ namespace Sitecore.Support.ExperienceEditor.Speak.Ribbon.Requests.LockItem
         //if it is an EXM message, looping through related datasource items and unlocking them
         if (item.Paths.Path.Contains("Email Campaign/Messages"))
         {
-          this.UnlockDatasourceItems(item);
+          RelatedItemHelper.UnlockRelatedItems(item);
         }
         #endregion
         return item;
@@ -57,80 +61,7 @@ namespace Sitecore.Support.ExperienceEditor.Speak.Ribbon.Requests.LockItem
     }
 
     #region patch_helper_methods
-    protected void UnlockDatasourceItems(Item contentItem)
-    {
-      foreach (Item datasourceItem in GetDataSourceItems(contentItem))
-      {
-        datasourceItem.Locking.Unlock();
-      }
-    }
-    public List<Item> GetDataSourceItems(Item item)
-    {
-      string str;
-      List<string> dsItemsPath = new List<string>();
-      List<Item> itemList = new List<Item>();
-      str = this.GetLayoutField(item);
-      XmlDocument layoutXml = this.LoadData(str);
-      dsItemsPath = this.FindDataSource(layoutXml);
-      foreach (string itemPath in dsItemsPath)
-      {
-        if (Context.Database.GetItem(itemPath) != null)
-        {
-          itemList.Add(Context.Database.GetItem(itemPath));
-        }
-      }
-      return itemList;
-    }
-
-    protected string GetLayoutField(Item item)
-    {
-      if (item != null)
-      {
-        return item[FieldIDs.LayoutField];
-      }
-      return String.Empty;
-    }
-
-    private XmlDocument LoadData(string str)
-    {
-      if (!string.IsNullOrEmpty(str))
-      {
-        return XmlUtil.LoadXml(str);
-      }
-      return XmlUtil.LoadXml("<r/>");
-    }
-
-    private List<string> FindDataSource(XmlDocument doc)
-    {
-      List<string> dsList = new List<string>();
-      if (doc != null)
-      {
-        foreach (XmlNode child in doc.ChildNodes)
-        {
-          this.Recursively(child, dsList);
-        }
-        return dsList;
-      }
-      return null;
-    }
-
-    private void Recursively(XmlNode node, List<string> dsList)
-    {
-      string tmp;
-      tmp = XmlUtil.GetAttribute("ds", node);
-      if (String.IsNullOrEmpty(tmp))
-      {
-        tmp = XmlUtil.GetAttribute("s:ds", node);
-      }
-      if (!String.IsNullOrEmpty(tmp))
-      {
-        dsList.Add(tmp);
-      }
-      foreach (XmlNode child in node.ChildNodes)
-      {
-        this.Recursively(child, dsList);
-      }
-    }
+    
     #endregion
   }
 }
